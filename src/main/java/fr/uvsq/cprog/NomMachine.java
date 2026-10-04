@@ -12,8 +12,11 @@ import java.util.regex.Pattern;
  *
  * <p>Comme dans le DNS, la casse est ignorée : le nom est conservé en minuscules.
  */
-public class NomMachine {
-  /** Un label : lettres, chiffres et tirets, sans tiret au début ni à la fin. */
+public class NomMachine implements Comparable<NomMachine> {
+
+  /**
+   * Un label : lettres, chiffres et tirets, sans tiret au début ni à la fin.
+   */
   private static final String LABEL = "[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?";
   private static final Pattern FORMAT = Pattern.compile(LABEL + "(\\." + LABEL + ")+");
 
@@ -23,7 +26,7 @@ public class NomMachine {
    * Crée un nom qualifié de machine, converti en minuscules.
    *
    * @param nom le nom qualifié, sous la forme {@code machine.domaine}
-   * @throws NullPointerException si le nom est null
+   * @throws NullPointerException     si le nom est null
    * @throws IllegalArgumentException si le nom n'a pas la forme {@code machine.domaine}
    */
   public NomMachine(String nom) {
@@ -56,5 +59,28 @@ public class NomMachine {
   @Override
   public String toString() {
     return nom;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+
+    if (!(obj instanceof NomMachine o)) {
+      return false;
+    }
+
+    return this.nom.equals(o.nom);
+  }
+
+  @Override
+  public int hashCode() {
+    return nom.hashCode();
+  }
+
+  @Override
+  public int compareTo(NomMachine o) {
+    return nom.compareTo(o.nom);
   }
 }

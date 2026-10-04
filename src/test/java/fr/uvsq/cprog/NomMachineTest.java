@@ -1,7 +1,10 @@
 package fr.uvsq.cprog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -57,5 +60,50 @@ class NomMachineTest {
   @Test
   void constructeur_null_leveNullPointer() {
     assertThrows(NullPointerException.class, () -> new NomMachine(null));
+  }
+
+  @Test
+  void equals_memeNom_egauxEtMemeHashCode() {
+    NomMachine n1 = new NomMachine("www.uvsq.fr");
+    NomMachine n2 = new NomMachine("www.uvsq.fr");
+
+    assertEquals(n1, n2);
+    assertEquals(n1.hashCode(), n2.hashCode());
+  }
+
+  @Test
+  void equals_casseDifferente_egauxEtMemeHashCode() {
+    NomMachine n1 = new NomMachine("WWW.uvsq.fr");
+    NomMachine n2 = new NomMachine("www.uvsq.fr");
+
+    assertEquals(n1, n2);
+    assertEquals(n1.hashCode(), n2.hashCode());
+  }
+
+  @Test
+  void equals_nomsDifferents_differents() {
+    assertNotEquals(new NomMachine("www.uvsq.fr"), new NomMachine("poste.uvsq.fr"));
+  }
+
+  @Test
+  void equals_autreType_faux() {
+    NomMachine nom = new NomMachine("www.uvsq.fr");
+
+    assertFalse(nom.equals(null));
+    assertFalse(nom.equals("www.uvsq.fr"));
+  }
+
+  @Test
+  void compareTo_deuxNoms_ordreAlphabetique() {
+    NomMachine ecampus = new NomMachine("ecampus.uvsq.fr");
+    NomMachine www = new NomMachine("www.uvsq.fr");
+
+    assertTrue(ecampus.compareTo(www) < 0);
+    assertTrue(www.compareTo(ecampus) > 0);
+  }
+
+  @Test
+  void compareTo_memeNom_zero() {
+    assertEquals(0, new NomMachine("www.uvsq.fr").compareTo(new NomMachine("WWW.uvsq.fr")));
   }
 }
