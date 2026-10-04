@@ -1,6 +1,8 @@
 package fr.uvsq.cprog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
@@ -34,5 +36,27 @@ class AdresseIPTest {
   @Test
   void constructeur_null_leveNullPointer() {
     assertThrows(NullPointerException.class, () -> new AdresseIP(null));
+  }
+
+  @Test
+  void equals_memeAdresse_egalesEtMemeHashCode() {
+    AdresseIP a1 = new AdresseIP("193.51.31.90");
+    AdresseIP a2 = new AdresseIP("193.51.31.90");
+
+    assertEquals(a1, a2);
+    assertEquals(a1.hashCode(), a2.hashCode());
+  }
+
+  @Test
+  void equals_adressesDifferentes_differentes() {
+    assertNotEquals(new AdresseIP("193.51.31.90"), new AdresseIP("193.51.31.91"));
+  }
+
+  @Test
+  void equals_autreType_faux() {
+    AdresseIP adresse = new AdresseIP("193.51.31.90");
+
+    assertFalse(adresse.equals(null));
+    assertFalse(adresse.equals("193.51.31.90"));
   }
 }

@@ -1,5 +1,6 @@
 package fr.uvsq.cprog;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,6 +10,7 @@ import java.util.regex.Pattern;
  */
 @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class AdresseIP {
+
   private static final String OCTET = "(0|[1-9]\\d{0,2})";
   private static final Pattern FORMAT =
       Pattern.compile(OCTET + "\\." + OCTET + "\\." + OCTET + "\\." + OCTET);
@@ -19,7 +21,7 @@ public class AdresseIP {
    * Crée une adresse IP à partir de sa forme pointée.
    *
    * @param adresse l'adresse sous la forme {@code a.b.c.d}
-   * @throws NullPointerException si l'adresse est null
+   * @throws NullPointerException     si l'adresse est null
    * @throws IllegalArgumentException si l'adresse n'est pas une adresse IPv4 valide
    */
   public AdresseIP(String adresse) {
@@ -43,5 +45,15 @@ public class AdresseIP {
   @Override
   public String toString() {
     return String.format("%d.%d.%d.%d", octets[0], octets[1], octets[2], octets[3]);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof AdresseIP autre && Arrays.equals(octets, autre.octets);
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(octets);
   }
 }
