@@ -6,7 +6,7 @@ import java.util.Objects;
  * Une entrée du DNS : une adresse IP associée à un nom qualifié de machine.
  *
  * @param adresse l'adresse de la machine
- * @param nom     le nom qualifié de la machine
+ * @param nom le nom qualifié de la machine
  */
 public record DnsItem(AdresseIP adresse, NomMachine nom) {
 

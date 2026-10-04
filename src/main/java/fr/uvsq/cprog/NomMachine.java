@@ -26,7 +26,7 @@ public class NomMachine implements Comparable<NomMachine> {
    * Crée un nom qualifié de machine, converti en minuscules.
    *
    * @param nom le nom qualifié, sous la forme {@code machine.domaine}
-   * @throws NullPointerException     si le nom est null
+   * @throws NullPointerException si le nom est null
    * @throws IllegalArgumentException si le nom n'a pas la forme {@code machine.domaine}
    */
   public NomMachine(String nom) {

@@ -16,10 +16,13 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class AdresseIP implements Comparable<AdresseIP> {
+
   private static final int NB_OCTETS = 4;
   private static final int OCTET_MAX = 255;
 
-  /** Un octet en décimal : 0, ou un nombre sans zéro en tête ni signe. */
+  /**
+   * Un octet en décimal : 0, ou un nombre sans zéro en tête ni signe.
+   */
   private static final String OCTET = "(0|[1-9]\\d{0,2})";
   private static final Pattern FORMAT =
       Pattern.compile(String.join("\\.", Collections.nCopies(NB_OCTETS, OCTET)));

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
  * Tests unitaires de la classe {@link DnsItem}.
  */
 class DnsItemTest {
+
   private final AdresseIP adresse = new AdresseIP("193.51.31.90");
   private final NomMachine nom = new NomMachine("www.uvsq.fr");
 
