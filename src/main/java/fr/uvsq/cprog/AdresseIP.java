@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * Une adresse IPv4.
  */
 @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-public class AdresseIP {
+public class AdresseIP implements Comparable<AdresseIP> {
 
   private static final String OCTET = "(0|[1-9]\\d{0,2})";
   private static final Pattern FORMAT =
@@ -55,5 +55,19 @@ public class AdresseIP {
   @Override
   public int hashCode() {
     return Arrays.hashCode(octets);
+  }
+
+  @Override
+  public int compareTo(AdresseIP o) {
+
+    for (int i = 0; i < 4; i++) {
+      if (this.octets[i] > o.octets[i]) {
+        return 1;
+      }
+      if (this.octets[i] < o.octets[i]) {
+        return -1;
+      }
+    }
+    return 0;
   }
 }

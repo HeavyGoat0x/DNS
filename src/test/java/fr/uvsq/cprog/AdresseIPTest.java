@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,5 +59,28 @@ class AdresseIPTest {
 
     assertFalse(adresse.equals(null));
     assertFalse(adresse.equals("193.51.31.90"));
+  }
+
+  @Test
+  void compareTo_dernierOctet_ordreNumeriqueEtNonAlphabetique() {
+    AdresseIP petite = new AdresseIP("193.51.31.90");
+    AdresseIP grande = new AdresseIP("193.51.31.154");
+
+    assertTrue(petite.compareTo(grande) < 0);
+    assertTrue(grande.compareTo(petite) > 0);
+  }
+
+  @Test
+  void compareTo_premierOctet_decideAvantLesSuivants() {
+    AdresseIP petite = new AdresseIP("9.255.255.255");
+    AdresseIP grande = new AdresseIP("10.0.0.0");
+
+    assertTrue(petite.compareTo(grande) < 0);
+    assertTrue(grande.compareTo(petite) > 0);
+  }
+
+  @Test
+  void compareTo_memeAdresse_zero() {
+    assertEquals(0, new AdresseIP("193.51.31.90").compareTo(new AdresseIP("193.51.31.90")));
   }
 }
