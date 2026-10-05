@@ -12,17 +12,21 @@ import java.util.Map;
  * Un serveur DNS simulé : associe des noms qualifiés de machines à des adresses IP.
  *
  * <p>La base est un fichier texte, à raison d'une machine par ligne au format
- * {@code nom.qualifie adresse.ip}. Elle est chargée en mémoire à la création, puis indexée
- * deux fois pour permettre la recherche dans les deux sens : par nom et par adresse.
+ * {@code nom.qualifie adresse.ip}. Elle est chargée en mémoire à la création, puis indexée deux
+ * fois pour permettre la recherche dans les deux sens : par nom et par adresse.
  */
 public class Dns {
 
   private final Path fichier;
 
-  /** Les entrées indexées par adresse, dans l'ordre du fichier. */
+  /**
+   * Les entrées indexées par adresse, dans l'ordre du fichier.
+   */
   private final Map<AdresseIP, DnsItem> parAdresse = new LinkedHashMap<>();
 
-  /** Les mêmes entrées, indexées par nom. */
+  /**
+   * Les mêmes entrées, indexées par nom.
+   */
   private final Map<NomMachine, DnsItem> parNom = new HashMap<>();
 
   /**
@@ -60,19 +64,29 @@ public class Dns {
    * Recherche une machine par son nom qualifié.
    *
    * @param nom le nom qualifié de la machine
-   * @return l'entrée correspondante, ou {@code null} si le nom est inconnu
+   * @return l'entrée correspondante
+   * @throws DnsException si le nom est inconnu
    */
-  public DnsItem getItem(NomMachine nom) {
-    return parNom.get(nom);
+  public DnsItem getItem(NomMachine nom) throws DnsException {
+    DnsItem item = parNom.get(nom);
+    if (item == null) {
+      throw new DnsException("Machine inconnue : " + nom);
+    }
+    return item;
   }
 
   /**
    * Recherche une machine par son adresse IP.
    *
    * @param adresse l'adresse IP de la machine
-   * @return l'entrée correspondante, ou {@code null} si l'adresse est inconnue
+   * @return l'entrée correspondante
+   * @throws DnsException si l'adresse est inconnue
    */
-  public DnsItem getItem(AdresseIP adresse) {
-    return parAdresse.get(adresse);
+  public DnsItem getItem(AdresseIP adresse) throws DnsException {
+    DnsItem item = parAdresse.get(adresse);
+    if (item == null) {
+      throw new DnsException("Adresse inconnue : " + adresse);
+    }
+    return item;
   }
 }
