@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -88,5 +89,19 @@ public class Dns {
       throw new DnsException("Adresse inconnue : " + adresse);
     }
     return item;
+  }
+
+  /**
+   * Renvoie les machines d'un domaine, sans tenir compte de la casse.
+   *
+   * @param domaine le nom de domaine, par exemple {@code uvsq.fr}
+   * @return les entrées dont le nom appartient à ce domaine, sans ordre garanti ; une liste vide
+   *     si le domaine n'a aucune machine
+   */
+  public List<DnsItem> getItems(String domaine) {
+    String domaineMinuscules = domaine.toLowerCase(Locale.ROOT);
+    return parAdresse.values().stream()
+        .filter(item -> item.nom().getDomaine().equals(domaineMinuscules))
+        .toList();
   }
 }

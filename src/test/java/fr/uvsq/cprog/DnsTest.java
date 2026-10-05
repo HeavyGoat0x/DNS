@@ -2,9 +2,12 @@ package fr.uvsq.cprog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -60,5 +63,29 @@ class DnsTest {
         () -> dns.getItem(new AdresseIP("1.2.3.4")));
 
     assertEquals("Adresse inconnue : 1.2.3.4", e.getMessage());
+  }
+
+  @Test
+  void getItems_domaine_renvoieSeulementSesMachines() {
+    Set<NomMachine> noms = dns.getItems("uvsq.fr").stream().map(DnsItem::nom)
+        .collect(Collectors.toSet());
+
+    assertEquals(Set.of(new NomMachine("www.uvsq.fr"), new NomMachine("poste.uvsq.fr"),
+        new NomMachine("ecampus.uvsq.fr")), noms);
+  }
+
+  @Test
+  void getItems_domaineEnMajuscules_trouveLesMachines() {
+    assertEquals(3, dns.getItems("UVSQ.Fr").size());
+  }
+
+  @Test
+  void getItems_domaineInconnu_listeVide() {
+    assertTrue(dns.getItems("random.org").isEmpty());
+  }
+
+  @Test
+  void getItems_sousDomaine_nonInclus() {
+    assertTrue(dns.getItems("fr").isEmpty());
   }
 }
