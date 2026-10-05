@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,11 +22,13 @@ class DnsTest {
   @TempDir
   Path dossier;
 
+  private Path fichier;
   private Dns dns;
 
   @BeforeEach
   void setUp() throws IOException, DnsException {
-    dns = new Dns(BaseExemple.ecrit(dossier));
+    fichier = BaseExemple.ecrit(dossier);
+    dns = new Dns(fichier);
   }
 
   @Test
@@ -87,5 +91,56 @@ class DnsTest {
   @Test
   void getItems_sousDomaine_nonInclus() {
     assertTrue(dns.getItems("fr").isEmpty());
+  }
+
+  @Test
+  void addItem_nouvelleMachine_trouveeParNomEtParAdresse() throws DnsException {
+    dns.addItem(new AdresseIP("193.51.25.24"), new NomMachine("pikachu.uvsq.fr"));
+
+    assertEquals(new AdresseIP("193.51.25.24"),
+        dns.getItem(new NomMachine("pikachu.uvsq.fr")).adresse());
+    assertEquals(new NomMachine("pikachu.uvsq.fr"),
+        dns.getItem(new AdresseIP("193.51.25.24")).nom());
+  }
+
+  @Test
+  void addItem_nouvelleMachine_fichierActualise() throws IOException, DnsException {
+    dns.addItem(new AdresseIP("193.51.25.24"), new NomMachine("pikachu.uvsq.fr"));
+
+    List<String> lignes = Files.readAllLines(fichier);
+    assertEquals("pikachu.uvsq.fr 193.51.25.24", lignes.get(lignes.size() - 1));
+
+    Dns relu = new Dns(fichier);
+    assertEquals(new AdresseIP("193.51.25.24"),
+        relu.getItem(new NomMachine("pikachu.uvsq.fr")).adresse());
+    assertEquals(new AdresseIP("193.51.31.90"),
+        relu.getItem(new NomMachine("www.uvsq.fr")).adresse());
+  }
+
+  @Test
+  void addItem_nomExistant_leveDnsException() {
+    DnsException e = assertThrows(DnsException.class,
+        () -> dns.addItem(new AdresseIP("193.51.25.90"), new NomMachine("www.uvsq.fr")));
+
+    assertEquals("Le nom de machine existe déjà !", e.getMessage());
+  }
+
+  @Test
+  void addItem_adresseExistante_leveDnsException() {
+    DnsException e = assertThrows(DnsException.class,
+        () -> dns.addItem(new AdresseIP("193.51.31.90"), new NomMachine("pikachu.uvsq.fr")));
+
+    assertEquals("L'adresse IP existe déjà !", e.getMessage());
+  }
+
+  @Test
+  void addItem_refuse_fichierEtBaseInchanges() throws IOException {
+    List<String> avant = Files.readAllLines(fichier);
+
+    assertThrows(DnsException.class,
+        () -> dns.addItem(new AdresseIP("193.51.31.90"), new NomMachine("pikachu.uvsq.fr")));
+
+    assertEquals(avant, Files.readAllLines(fichier));
+    assertThrows(DnsException.class, () -> dns.getItem(new NomMachine("pikachu.uvsq.fr")));
   }
 }

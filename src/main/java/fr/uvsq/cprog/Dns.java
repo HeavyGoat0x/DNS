@@ -3,6 +3,7 @@ package fr.uvsq.cprog;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -95,13 +96,56 @@ public class Dns {
    * Renvoie les machines d'un domaine, sans tenir compte de la casse.
    *
    * @param domaine le nom de domaine, par exemple {@code uvsq.fr}
-   * @return les entrées dont le nom appartient à ce domaine, sans ordre garanti ; une liste vide
-   *     si le domaine n'a aucune machine
+   * @return les entrées dont le nom appartient à ce domaine, sans ordre garanti ; une liste vide si
+   *     le domaine n'a aucune machine
    */
   public List<DnsItem> getItems(String domaine) {
     String domaineMinuscules = domaine.toLowerCase(Locale.ROOT);
     return parAdresse.values().stream()
         .filter(item -> item.nom().getDomaine().equals(domaineMinuscules))
         .toList();
+  }
+
+  /**
+   * Ajoute une machine à la base et réécrit le fichier.
+   *
+   * <p>Le fichier est écrit avant la mise à jour de la base en mémoire : si l'écriture échoue,
+   * la base reste identique au fichier.
+   *
+   * @param adresse l'adresse IP de la nouvelle machine
+   * @param nom le nom qualifié de la nouvelle machine
+   * @throws DnsException si le nom ou l'adresse existe déjà, ou si le fichier ne peut pas être
+   *     écrit
+   */
+  public void addItem(AdresseIP adresse, NomMachine nom) throws DnsException {
+    if (parNom.containsKey(nom)) {
+      throw new DnsException("Le nom de machine existe déjà !");
+    }
+    if (parAdresse.containsKey(adresse)) {
+      throw new DnsException("L'adresse IP existe déjà !");
+    }
+
+    DnsItem item = new DnsItem(adresse, nom);
+    List<String> lignes = new ArrayList<>();
+    for (DnsItem existant : parAdresse.values()) {
+      lignes.add(ligne(existant));
+    }
+    lignes.add(ligne(item));
+
+    try {
+      Files.write(fichier, lignes);
+    } catch (IOException e) {
+      throw new DnsException("Écriture impossible : " + fichier, e);
+    }
+
+    parAdresse.put(adresse, item);
+    parNom.put(nom, item);
+  }
+
+  /**
+   * Renvoie la ligne du fichier correspondant à une entrée : le nom, puis l'adresse.
+   */
+  private static String ligne(DnsItem item) {
+    return item.nom() + " " + item.adresse();
   }
 }
