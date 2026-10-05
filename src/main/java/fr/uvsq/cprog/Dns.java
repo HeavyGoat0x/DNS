@@ -36,7 +36,8 @@ public class Dns {
    *
    * @param fichier le fichier de la base, une machine par ligne au format
    *     {@code nom.qualifie adresse.ip}
-   * @throws DnsException si le fichier ne peut pas être lu
+   * @throws DnsException si le fichier ne peut pas être lu, ou si une ligne est mal formée ou
+   *     reprend un nom ou une adresse déjà présents
    */
   public Dns(Path fichier) throws DnsException {
     this.fichier = fichier;
@@ -48,17 +49,26 @@ public class Dns {
       throw new DnsException("Lecture impossible : " + fichier, e);
     }
 
-    for (String ligne : lignes) {
+    for (int i = 0; i < lignes.size(); i++) {
+      String ligne = lignes.get(i);
       if (ligne.isBlank()) {
         continue;
       }
 
       String[] champs = ligne.trim().split("\\s+");
-      AdresseIP adresse = new AdresseIP(champs[1]);
-      NomMachine nom = new NomMachine(champs[0]);
-      DnsItem dnsItem = new DnsItem(adresse, nom);
-      parAdresse.put(adresse, dnsItem);
-      parNom.put(nom, dnsItem);
+      if (champs.length != 2) {
+        throw new DnsException("Ligne " + (i + 1) + " invalide : " + ligne);
+      }
+
+      try {
+        AdresseIP adresse = new AdresseIP(champs[1]);
+        NomMachine nom = new NomMachine(champs[0]);
+        verifieAbsent(adresse, nom);
+        enregistre(new DnsItem(adresse, nom));
+      } catch (IllegalArgumentException | DnsException e) {
+        throw new DnsException(
+            "Ligne " + (i + 1) + " invalide : " + ligne + " (" + e.getMessage() + ")", e);
+      }
     }
   }
 
@@ -118,12 +128,7 @@ public class Dns {
    *     écrit
    */
   public void addItem(AdresseIP adresse, NomMachine nom) throws DnsException {
-    if (parNom.containsKey(nom)) {
-      throw new DnsException("Le nom de machine existe déjà !");
-    }
-    if (parAdresse.containsKey(adresse)) {
-      throw new DnsException("L'adresse IP existe déjà !");
-    }
+    verifieAbsent(adresse, nom);
 
     DnsItem item = new DnsItem(adresse, nom);
     List<String> lignes = new ArrayList<>();
@@ -138,8 +143,27 @@ public class Dns {
       throw new DnsException("Écriture impossible : " + fichier, e);
     }
 
-    parAdresse.put(adresse, item);
-    parNom.put(nom, item);
+    enregistre(item);
+  }
+
+  /**
+   * Vérifie que ni le nom ni l'adresse ne sont déjà dans la base.
+   */
+  private void verifieAbsent(AdresseIP adresse, NomMachine nom) throws DnsException {
+    if (parNom.containsKey(nom)) {
+      throw new DnsException("Le nom de machine existe déjà !");
+    }
+    if (parAdresse.containsKey(adresse)) {
+      throw new DnsException("L'adresse IP existe déjà !");
+    }
+  }
+
+  /**
+   * Range une entrée dans les deux tables : c'est le seul endroit qui les modifie.
+   */
+  private void enregistre(DnsItem item) {
+    parAdresse.put(item.adresse(), item);
+    parNom.put(item.nom(), item);
   }
 
   /**

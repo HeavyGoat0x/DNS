@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Tests unitaires de la classe {@link Dns}.
@@ -29,6 +31,37 @@ class DnsTest {
   void setUp() throws IOException, DnsException {
     fichier = BaseExemple.ecrit(dossier);
     dns = new Dns(fichier);
+  }
+
+  @Test
+  void constructeur_fichierAbsent_leveDnsException() {
+    assertThrows(DnsException.class, () -> new Dns(dossier.resolve("absent.txt")));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+      "poste.uvsq.fr pas.une.adresse",
+      "poste.uvsq.fr",
+      "poste.uvsq.fr 193.51.31.154 en.trop",
+      "pas_un_nom 193.51.31.154",
+      "www.uvsq.fr 193.51.31.154",
+      "poste.uvsq.fr 193.51.31.90"})
+  void constructeur_deuxiemeLigneInvalide_leveDnsExceptionAvecNumero(String ligne)
+      throws IOException {
+    Path invalide = dossier.resolve("invalide.txt");
+    Files.write(invalide, List.of("www.uvsq.fr 193.51.31.90", ligne));
+
+    DnsException e = assertThrows(DnsException.class, () -> new Dns(invalide));
+
+    assertTrue(e.getMessage().startsWith("Ligne 2 invalide : " + ligne), e.getMessage());
+  }
+
+  @Test
+  void constructeur_lignesVides_ignorees() throws IOException, DnsException {
+    Path avecVides = dossier.resolve("vides.txt");
+    Files.write(avecVides, List.of("", "www.uvsq.fr 193.51.31.90", "   "));
+
+    assertEquals(1, new Dns(avecVides).getItems("uvsq.fr").size());
   }
 
   @Test
