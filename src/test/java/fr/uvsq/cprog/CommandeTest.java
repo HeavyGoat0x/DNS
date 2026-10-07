@@ -1,10 +1,13 @@
 package fr.uvsq.cprog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -94,5 +97,24 @@ class CommandeTest {
 
     DnsException e = assertThrows(DnsException.class, commande::execute);
     assertEquals("Le nom de machine existe déjà !", e.getMessage());
+  }
+
+  @Test
+  void quitter_execute_declencheArretSansRienAfficher() {
+    AtomicBoolean arrete = new AtomicBoolean(false);
+
+    String resultat = new CommandeQuitter(() -> arrete.set(true)).execute();
+
+    assertTrue(arrete.get());
+    assertEquals("", resultat);
+  }
+
+  @Test
+  void quitter_creation_neDeclenchePasArret() {
+    AtomicBoolean arrete = new AtomicBoolean(false);
+
+    new CommandeQuitter(() -> arrete.set(true));
+
+    assertFalse(arrete.get());
   }
 }
