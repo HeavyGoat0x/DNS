@@ -76,4 +76,23 @@ class CommandeTest {
   void listeDomaine_domaineInconnu_chaineVide() {
     assertEquals("", new CommandeListeDomaine(dns, "inconnu.org", false).execute());
   }
+
+  @Test
+  void ajout_nouvelleMachine_ajouteeSansRienAfficher() throws DnsException {
+    Commande commande = new CommandeAjout(dns, new AdresseIP("193.51.25.24"),
+        new NomMachine("pikachu.uvsq.fr"));
+
+    assertEquals("", commande.execute());
+    assertEquals(new AdresseIP("193.51.25.24"),
+        dns.getItem(new NomMachine("pikachu.uvsq.fr")).adresse());
+  }
+
+  @Test
+  void ajout_nomExistant_leveDnsExceptionDuSujet() {
+    Commande commande = new CommandeAjout(dns, new AdresseIP("193.51.25.90"),
+        new NomMachine("www.uvsq.fr"));
+
+    DnsException e = assertThrows(DnsException.class, commande::execute);
+    assertEquals("Le nom de machine existe déjà !", e.getMessage());
+  }
 }
