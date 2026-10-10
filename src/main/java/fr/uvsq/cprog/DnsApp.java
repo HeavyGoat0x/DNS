@@ -1,7 +1,10 @@
 package fr.uvsq.cprog;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.Path;
+import java.util.Properties;
 
 /**
  * L'application DNS : enchaîne la lecture, l'exécution et l'affichage des commandes.
@@ -10,6 +13,8 @@ import java.io.PrintStream;
  * {@code ERREUR : message}, puis l'application attend la commande suivante.
  */
 public class DnsApp {
+  private static final String PROPRIETES = "/dns.properties";
+  private static final String CLE_FICHIER = "dns.fichier";
 
   private final DnsTUI tui;
   private boolean enCours = true;
@@ -36,6 +41,43 @@ public class DnsApp {
       } catch (DnsException | IllegalArgumentException e) {
         tui.affiche("ERREUR : " + e.getMessage());
       }
+    }
+  }
+
+  /**
+   * Lit le chemin de la base dans le fichier de propriétés {@code dns.properties}.
+   *
+   * @return le chemin donné par la propriété {@code dns.fichier}
+   * @throws IOException si le fichier de propriétés est introuvable, illisible, ou ne contient
+   *     pas la propriété {@code dns.fichier}
+   */
+  static Path cheminBase() throws IOException {
+    Properties proprietes = new Properties();
+    try (InputStream in = DnsApp.class.getResourceAsStream(PROPRIETES)) {
+      if (in == null) {
+        throw new IOException("Fichier de propriétés introuvable : " + PROPRIETES);
+      }
+      proprietes.load(in);
+    }
+
+    String nom = proprietes.getProperty(CLE_FICHIER);
+    if (nom == null) {
+      throw new IOException("Propriété " + CLE_FICHIER + " absente de " + PROPRIETES);
+    }
+    return Path.of(nom);
+  }
+
+  /**
+   * Lance l'application sur la base indiquée dans {@code dns.properties}.
+   *
+   * @param args ignorés
+   */
+  public static void main(String[] args) {
+    try {
+      new DnsApp(new Dns(cheminBase()), System.in, System.out).run();
+    } catch (IOException | DnsException e) {
+      System.err.println("ERREUR : " + e.getMessage());
+      System.exit(1);
     }
   }
 }

@@ -88,4 +88,9 @@ class DnsAppTest {
   void run_finDeSaisieSansQuit_seTermine() {
     assertEquals("> 193.51.31.90\n> ", execute("www.uvsq.fr\n"));
   }
+
+  @Test
+  void cheminBase_fichierDeProprietes_renvoieDnsTxt() throws IOException {
+    assertEquals(Path.of("dns.txt"), DnsApp.cheminBase());
+  }
 }
